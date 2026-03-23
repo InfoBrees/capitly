@@ -10,6 +10,9 @@ assignees: ''
 ## Summary
 <!-- Short, clear description of the issue -->
 
+## Motivation
+<!-- Why is this needed? -->
+
 ## Definition of Done
 <!-- Make sure all those points are done by the end of the issue -->
 - [ ] Example 1
