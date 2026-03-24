@@ -1,0 +1,79 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Run Tests
+      working-directory: ./capitly
+      run: mvn test
+
+  build-jar:
+    name: Build JAR
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Set Maven version from tag (tag builds)
+      if: startsWith(github.ref, 'refs/tags/')
+      working-directory: ./capitly
+      shell: bash
+      run: |
+        VERSION="${GITHUB_REF_NAME#v}"
+        mvn -q versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+
+    - name: Build with Maven (skip tests)
+      working-directory: ./capitly
+      run: mvn clean package -DskipTests
+
+    - name: Upload JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: jar-artifact
+        path: coincollector/target/coincollector-*.jar

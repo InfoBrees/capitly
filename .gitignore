@@ -129,12 +129,12 @@ http-client.private.env.json
 .idea/**/copilot.data.migration.*.xml
 
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
-!*.code-workspace
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-snippets
+*.code-workspace
 
 # Built Visual Studio Code Extensions
 *.vsix
