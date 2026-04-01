@@ -1,10 +1,10 @@
 # Gesamtsystem Architektur
-Es sei zu beachten, dass dies ein lernprojekt ist.
+Es sei zu beachten, dass dies ein Lernprojekt ist.
 
 Diese Datei ergänzt das Architekturdiagramm um Entscheidungshintergründe, Verantwortlichkeiten der Komponenten und Überlegungen.
 
 ## Kurzüberblick
-- Architektur‑Typ: Modularer Monolith (`core`) kombiniert mit gezielten Microservices (`Auth`, `ML`) und einem containerisierten Frontend.
+- Architektur‑Typ: Modularer Monolith (`core`) kombiniert mit gezielten Microservices (`auth`, `ai`) und einem containerisierten Frontend.
 - Warum: Der modulare Monolith erlaubt schnellere Iterationen zu Beginn im kleinen Team und einfache Integration der Business‑Logik; separate Microservices kapseln sicherheits- und skalenkritische Funktionalität (z. B. Auth), die unabhängig betrieben oder skaliert werden kann.
 - Hauptziele:
   - **Sicherheit:** Trennung von Auth‑Domain und sensiblen Credentials in einem eigenen Netzwerk und eigener Datenbank.
@@ -23,11 +23,11 @@ Diese Datei ergänzt das Architekturdiagramm um Entscheidungshintergründe, Vera
 	- Zweck: Kern‑Businesslogik, Domain‑Modelle, REST API, Aggregation von Daten aus DBs, Caching, Integrationspunkte zu ML und externen APIs.
 	- Entscheidungsunterpunkt: Java/Spring gewählt wegen bestehendern Java Kentnissen, stabilem Ökosystem und guter JVM‑Betriebsqualität. Bei starker ML‑Integration kann ein separates Service in Python sinnvoll sein (siehe ML‑Abschnitt).
 
-- **Auth Service (capitly.Auth) — Spring Authorization Server (Java)**
+- **Auth Service (capitly.auth) — Spring Authorization Server (Java)**
 	- Zweck: OIDC/OAuth2 Autorisierung, Benutzerverwaltung, Token‑Issuance (JWT, Refresh‑Tokens), sichere Trennung von Auth‑Daten.
 	- Entscheidung: Eigenes Microservice, um Schlüsselmaterial, Token‑Lifecycle und Sicherheitsrichtlinien isoliert zu betreiben; ermöglicht unabhängigere Updates und Härtungsmaßnahmen.
 
-- **ML Service (capitly.ML) — Inference / Modell‑Hosting**
+- **ML Service (capitly.ai) — Inference / Modell‑Hosting**
 	- Zweck: Modelle für Vorhersagen, Scoring, Anomalieerkennung oder Portfolio‑Auswertung bereitstellen, wir schauen mal was wird.
 	- Entscheidung (Unterpunkt): Implementierungsoptionen:
 		- **Python:** breites Ökosystem (pandas, scikit‑learn, TensorFlow, PyTorch, Prophet), einfacher Zugriff auf Community‑Modelle.
@@ -53,15 +53,15 @@ Diese Datei ergänzt das Architekturdiagramm um Entscheidungshintergründe, Vera
 
 ## Docker‑Netzwerke
 - Auth‑Netz (hellblau): enthält `Auth` + `PostgreSQL_auth` — isoliert Credentials und Token‑Lifecycle.
-- Core‑Netz (hellgrün): enthält `core`, `ML`, Core‑DB(s), InfluxDB, Valkey — erlaubt interne Kommunikation und Cache‑Zugriff.
+- Core‑Netz (hellgrün): enthält `core`, `AI`, Core‑DB(s), InfluxDB, Valkey — erlaubt interne Kommunikation und Cache‑Zugriff.
 
 ## Kommunikation (Pfeile)
 - `Frontend -> Core`: REST (HTTPS / JSON) — UI‑Interaktionen, Charts, CRUD
-- `Frontend -> Auth`: OIDC/OAuth2 (HTTPS) — Login / Token‑Flow (PKCE für SPA)
-- `Core -> Auth`: JWKS / JWT‑Validierung (HTTPS)
-- `Core -> ML`: async jobs (Kafka) oder HTTP Job API — Batch/Inference
+- `Frontend -> auth`: OIDC/OAuth2 (HTTPS) — Login / Token‑Flow (PKCE für SPA)
+- `Core -> auth`: JWKS / JWT‑Validierung (HTTPS)
+- `Core -> ai`: async jobs (Kafka) oder HTTP Job API — Batch/Inference
 - `Core -> External Finance API`: REST (HTTPS / JSON), Websockets — rate‑limited, cached
-- `Core -> PostgreSQL_core`: JDBC / SQL; `Auth -> PostgreSQL_auth`: JDBC / SQL
+- `Core -> PostgreSQL_core`: JDBC / SQL; `auth -> PostgreSQL_auth`: JDBC / SQL
 - `Core -> Valkey`: Cache read/write (Redis‑like)
 - `Core -> InfluxDB`: Time‑Series writes/queries (HTTP / line‑protocol)
 
@@ -99,13 +99,13 @@ Diese Datei ergänzt das Architekturdiagramm um Entscheidungshintergründe, Vera
 
 ## Sicherheit — Auth / JWT Flow (verbindlich, Spring‑basierter Standard)
 
-Verbindliche Architekturentscheidung: Der `Auth` Microservice ist der **Authorization Server** und stellt Access‑ und Refresh‑Tokens aus; das `core` Backend ist der **Resource Server** und prüft diese Tokens, bevor es Geschäftslogik ausführt. Der Authorization Server signiert die Tokens, der Resource Server validiert sie lokal via JWKS und vertraut dabei auf die vom Authorization Server veröffentlichte Signatur. Für die Implementierung verwenden wir standardisiert **Spring Security**.
+Verbindliche Architekturentscheidung: Der `auth` Microservice ist der **Authorization Server** und stellt Access‑ und Refresh‑Tokens aus; das `core` Backend ist der **Resource Server** und prüft diese Tokens, bevor es Geschäftslogik ausführt. Der Authorization Server signiert die Tokens, der Resource Server validiert sie lokal via JWKS und vertraut dabei auf die vom Authorization Server veröffentlichte Signatur. Für die Implementierung verwenden wir standardisiert **Spring Security**.
 
 Ziel: Klare, standardisierte Implementierung für Token‑Issuance, lokale Verifikation und sichere Handhabung von Refresh‑Tokens mit Spring‑Technologien.
 
 1. **Anmeldung (Frontend → Auth Service)**
 	- Das SPA startet zwingend den OIDC Authorization Code Flow mit PKCE (kein Implicit Flow, kein direkte Token‑Grant für SPAs).
-	- Der Nutzer authentifiziert sich (Passwort, MFA optional). Der `Auth` Service (Spring Authorization Server) signiert danach ein Access Token (JWT, RS256) und erstellt ein Refresh Token.
+	- Der Nutzer authentifiziert sich (Passwort, MFA optional). Der `auth` Service (Spring Authorization Server) signiert danach ein Access Token (JWT, RS256) und erstellt ein Refresh Token.
 
 		Was ist der OIDC PKCE‑Flow?
 
@@ -145,13 +145,13 @@ Ziel: Klare, standardisierte Implementierung für Token‑Issuance, lokale Verif
 
 6. **Refresh Flow**
 	- Wenn das JWT abläuft, nutzt das Frontend den Refresh Token, um beim `Auth` Service ein neues JWT zu holen.
-	- Der `Auth` Service prüft den Refresh Token und gibt ein neues Access Token aus; optional wird der Refresh Token rotiert.
+	- Der `auth` Service prüft den Refresh Token und gibt ein neues Access Token aus; optional wird der Refresh Token rotiert.
 
 7. **Key‑Rotation & JWKS‑Caching**
-	- Der `Auth` Service veröffentlicht neue öffentliche Schlüssel über JWKS, `core` cached sie für die lokale Signaturprüfung.
+	- Der `auth` Service veröffentlicht neue öffentliche Schlüssel über JWKS, `core` cached sie für die lokale Signaturprüfung.
 
 8. **Rollenmodell und Berechtigungen**
 
 - Das konkrete Rollenmodell muss noch entworfen werden; aktuell ist nur die Richtung klar: Rechte werden über Rollen und Scopes im JWT abgebildet.
 - Das `core` Backend prüft bei jeder Anfrage, ob die Rolle oder der Scope zum Endpunkt passt. Wenn nicht, wird der Zugriff abgelehnt.
-- Der `Auth` Service muss diese Rollen/Scopes beim Ausstellen des JWTs mitgeben, damit `core` sie lokal auswerten kann.
+- Der `auth` Service muss diese Rollen/Scopes beim Ausstellen des JWTs mitgeben, damit `core` sie lokal auswerten kann.

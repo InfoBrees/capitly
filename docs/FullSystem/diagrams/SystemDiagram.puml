@@ -1,4 +1,4 @@
-@startuml System_Diagramm_High-Level
+@startuml System_Diagram_High-Level
 
 actor "User / Browser" as User
 
@@ -12,11 +12,11 @@ package Backend {
         component Feature...
     }
 
-    package "Auth Service (microservice)" as capitly.Auth #ADD8E6
-    package "ML Service (microservice)" as capitly.ML #DFF7DF
+    package "auth Service (microservice)" as capitly.auth #ADD8E6
+    package "ai Service (microservice)" as capitly.ai #DFF7DF
 
-    capitly.core ..> capitly.ML : async jobs / events (Kafka/Queue)
-    capitly.core --> capitly.Auth : JWT validation (JWKS fetch HTTPS)
+    capitly.core ..> capitly.ai : async jobs / events (Kafka/Queue)
+    capitly.core --> capitly.auth : JWT validation (JWKS fetch HTTPS)
 }
 
 package Datastores {
@@ -29,7 +29,7 @@ package Datastores {
 capitly.core ---> PG_core : owns / JDBC / SQL
 capitly.core ---> VALKEY : Cache read/write (TCP/Redis-like)
 capitly.core ---> INFLUX : Influx write/query (HTTP / line-protocol)
-capitly.Auth ---> PG_auth : owns / JDBC / SQL
+capitly.auth ---> PG_auth : owns / JDBC / SQL
 
 package External {
     component "External Finance API" as FINAPI
@@ -38,7 +38,7 @@ package External {
 
 User --> svelte
 svelte --> capitly.core : REST (HTTPS / JSON)
-svelte --> capitly.Auth : OIDC / OAuth2 (HTTPS)
+svelte --> capitly.auth : OIDC / OAuth2 (HTTPS)
 
 capitly.core -> FINAPI : REST (HTTPS / JSON)\n(rate‑limited, cached)
 ' Legend
