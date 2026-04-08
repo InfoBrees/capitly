@@ -2,11 +2,19 @@
 
 skinparam linetype ortho
 
-package Legend {
-    component "Auth Docker Network" as legendAuth #ADD8E6
-    component "Core Docker Network" as legendCore #DFF7DF
+package Datastores {
+    database "PostgreSQL_core\n(prod)" as PG_core #DFF7DF
+    database "PostgreSQL_auth" as PG_auth #ADD8E6
+    component "Valkey (cache)" as VALKEY #DFF7DF
+    database "InfluxDB (time-series)" as INFLUX #DFF7DF
 }
+
+package External {
+    component "External Finance APIs" as FINAPI
+}
+
 package Backend {
+
     package "core (modularer Monolith)" as capitly.core #DFF7DF { 
 
         package portfolio {
@@ -92,16 +100,19 @@ package Backend {
         userRepositoryImplementations ..|> userRepositoryInterfaces : implements
         authServiceInterfaces --> userRepositoryInterfaces : depends on
     }
-
+    
     capitly.core --> capitly.auth : JWT validation (JWKS fetch HTTPS)
 }
 
-package Datastores {
-    database "PostgreSQL_core\n(prod)" as PG_core #DFF7DF
-    database "PostgreSQL_auth" as PG_auth #ADD8E6
-}
+FINAPI <--- capitly.core : REST (HTTPS / JSON)\n(rate-limited, cached)
+PG_core <-- capitly.core : owns / JDBC / SQL
+VALKEY  <-- capitly.core: Cache read/write
+INFLUX  <-- capitly.core: Influx write/query 
+PG_auth <-- capitly.auth : owns / JDBC / SQL
 
-capitly.core -> PG_core : owns / JDBC / SQL
-capitly.auth -> PG_auth : owns / JDBC / SQL
+package Legend {
+    component "Auth Docker Network" as legendAuth #ADD8E6
+    component "Core Docker Network" as legendCore #DFF7DF
+}
 
 @enduml
