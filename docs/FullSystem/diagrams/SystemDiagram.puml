@@ -1,0 +1,50 @@
+@startuml System_Diagram_High-Level
+
+actor "User / Browser" as User
+
+package Frontend #DFF7DF{
+    component "Vite Svelte Frontend" as svelte
+}
+
+package Backend {
+    package "core (modularer Monolith)" as capitly.core #DFF7DF { 
+        component Feature1
+        component Feature...
+    }
+
+    package "auth Service (microservice)" as capitly.auth #ADD8E6
+    package "ai Service (microservice)" as capitly.ai #DFF7DF
+
+    capitly.core ..> capitly.ai : async jobs / events (Kafka/Queue)
+    capitly.core --> capitly.auth : JWT validation (JWKS fetch HTTPS)
+}
+
+package Datastores {
+    database "PostgreSQL_core\n(prod) / H2 (dev)" as PG_core #DFF7DF
+    database "PostgreSQL_auth" as PG_auth #ADD8E6
+    database "InfluxDB (time-series)" as INFLUX #DFF7DF
+    component "Valkey (cache)" as VALKEY #DFF7DF
+}
+
+capitly.core ---> PG_core : owns / JDBC / SQL
+capitly.core ---> VALKEY : Cache read/write (TCP/Redis-like)
+capitly.core ---> INFLUX : Influx write/query (HTTP / line-protocol)
+capitly.auth ---> PG_auth : owns / JDBC / SQL
+
+package External {
+    component "External Finance API" as FINAPI
+}
+
+
+User --> svelte
+svelte --> capitly.core : REST (HTTPS / JSON)
+svelte --> capitly.auth : OIDC / OAuth2 (HTTPS)
+
+capitly.core -> FINAPI : REST (HTTPS / JSON)\n(rate‑limited, cached)
+' Legend
+package Legend {
+    component "Auth Docker Network" as legendAuth #ADD8E6
+    component "Core Docker Network" as legendCore #DFF7DF
+}
+
+@enduml
