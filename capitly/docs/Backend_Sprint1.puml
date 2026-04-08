@@ -1,0 +1,118 @@
+@startuml Backend_Sprint1
+
+skinparam linetype ortho
+
+package Datastores {
+    database "PostgreSQL_core\n(prod)" as PG_core #DFF7DF
+    database "PostgreSQL_auth" as PG_auth #ADD8E6
+    component "Valkey (cache)" as VALKEY #DFF7DF
+    database "InfluxDB (time-series)" as INFLUX #DFF7DF
+}
+
+package External {
+    component "External Finance APIs" as FINAPI
+}
+
+package Backend {
+
+    package "core (modularer Monolith)" as capitly.core #DFF7DF { 
+
+        package portfolio {
+            package shares {
+                package "domain (shares)" as shares_domain {
+                    component shareEntities
+                    component shareRepositoryInterfaces
+                    component shareServiceInterfaces
+                }
+                package "infrastructure (shares)" as shares_infra {
+                    component shareRepositoryImplementations
+                    component shareServiceImplementations
+                }
+                package "controller (shares)" as shares_controller {
+                    component SharesController
+                }
+
+                SharesController --> shareServiceInterfaces : uses
+                shareServiceImplementations ..|> shareServiceInterfaces : implements
+                shareRepositoryImplementations ..|> shareRepositoryInterfaces : implements
+                shareServiceInterfaces --> shareRepositoryInterfaces : depends on
+            }
+
+            package crypto {
+                package "domain (crypto)" as crypto_domain {
+                    component cryptoEntities
+                    component cryptoRepositoryInterfaces
+                    component cryptoServiceInterfaces
+                }
+                package "infrastructure (crypto)" as crypto_infra {
+                    component cryptoRepositoryImplementations
+                    component cryptoServiceImplementations
+                }
+                package "controller (crypto)" as crypto_controller {
+                    component CryptoController
+                }
+
+                CryptoController --> cryptoServiceInterfaces : uses
+                cryptoServiceImplementations ..|> cryptoServiceInterfaces : implements
+                cryptoRepositoryImplementations ..|> cryptoRepositoryInterfaces : implements
+                cryptoServiceInterfaces --> cryptoRepositoryInterfaces : depends on
+            }
+
+            package etfs {
+                package "domain (etfs)" as etf_domain {
+                    component etfEntities
+                    component etfRepositoryInterfaces
+                    component etfServiceInterfaces
+                }
+                package "infrastructure (etfs)" as etf_infra {
+                    component etfRepositoryImplementations
+                    component etfServiceImplementations
+                }
+                package "controller (etfs)" as etf_controller {
+                    component EtfController
+                }
+
+                EtfController --> etfServiceInterfaces : uses
+                etfServiceImplementations ..|> etfServiceInterfaces : implements
+                etfRepositoryImplementations ..|> etfRepositoryInterfaces : implements
+                etfServiceInterfaces --> etfRepositoryInterfaces : depends on
+            }
+
+        }
+    }
+
+    package "auth Service (microservice)" as capitly.auth #ADD8E6 {
+        package "domain (auth)" as auth_domain {
+            component userEntities
+            component userRepositoryInterfaces
+            component authServiceInterfaces
+        }
+        package "infrastructure (auth)" as auth_infra {
+            component userRepositoryImplementations
+            component authServiceImplementations
+        }
+        package "controller (auth)" as auth_controller {
+            component AuthController
+        }
+
+        AuthController --> authServiceInterfaces : uses
+        authServiceImplementations ..|> authServiceInterfaces : implements
+        userRepositoryImplementations ..|> userRepositoryInterfaces : implements
+        authServiceInterfaces --> userRepositoryInterfaces : depends on
+    }
+    
+    capitly.core --> capitly.auth : JWT validation (JWKS fetch HTTPS)
+}
+
+FINAPI <--- capitly.core : REST (HTTPS / JSON)\n(rate-limited, cached)
+PG_core <-- capitly.core : owns / JDBC / SQL
+VALKEY  <-- capitly.core: Cache read/write
+INFLUX  <-- capitly.core: Influx write/query 
+PG_auth <-- capitly.auth : owns / JDBC / SQL
+
+package Legend {
+    component "Auth Docker Network" as legendAuth #ADD8E6
+    component "Core Docker Network" as legendCore #DFF7DF
+}
+
+@enduml
