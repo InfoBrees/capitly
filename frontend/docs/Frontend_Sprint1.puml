@@ -1,0 +1,81 @@
+@startuml Frontend_Sprint1
+
+skinparam linetype ortho
+
+package Frontend {
+	package "entrypoint" as frontend.entrypoint {
+		component mainTs
+		component AppSvelte
+	}
+
+	package "shared" as frontend.shared #E8E8E8 {
+		component apiClient
+		component sharedUiComponents
+		component sharedTypes
+	}
+
+	package portfolio {
+		package shares {
+			component sharesComponents
+			component sharesStore
+			component sharesService
+			component sharesApi
+
+			sharesComponents --> sharesStore : ui state
+			sharesStore --> sharesService : domain actions
+			sharesService --> sharesApi : requests
+		}
+
+		package crypto {
+			component cryptoComponents
+			component cryptoStore
+			component cryptoService
+			component cryptoApi
+
+			cryptoComponents --> cryptoStore : ui state
+			cryptoStore --> cryptoService : domain actions
+			cryptoService --> cryptoApi : requests
+		}
+
+		package etfs {
+			component etfsComponents
+			component etfsStore
+			component etfsService
+			component etfsApi
+
+			etfsComponents --> etfsStore : ui state
+			etfsStore --> etfsService : domain actions
+			etfsService --> etfsApi : requests
+		}
+	}
+
+	package auth {
+		component authComponents
+		component authStore
+		component authService
+		component authApi
+
+		authComponents --> authStore : ui state
+		authStore --> authService : auth actions
+		authService --> authApi : requests
+	}
+
+	frontend.entrypoint ---> portfolio
+	auth <--- frontend.entrypoint
+	portfolio --> frontend.shared : shared UI / types / auth session
+	auth --> frontend.shared : shared UI / types
+	apiClient <--- authStore : current JWT
+	sharesApi --> apiClient
+	cryptoApi --> apiClient
+	etfsApi --> apiClient
+}
+
+package Backend {
+	component "capitly.core" as capitly.core
+	component "capitly.auth" as capitly.auth
+}
+
+apiClient --> capitly.core : REST (HTTPS / JSON)
+authApi --> capitly.auth : OIDC PKCE (HTTPS)
+
+@enduml
