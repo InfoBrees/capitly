@@ -44,9 +44,19 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run linting
+      - name: Run spotless apply
         working-directory: ./capitly
-        run: mvn spotless:apply spotbugs:check
+        run: mvn spotless:apply
+
+      - name: Run check
+        working-directory: ./capitly
+        run: mvn spotbugs:check pmd:check
+
+      - name: Upload PMD report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pmd-report
+          path: ./capitly/target/site/pmd.html
 
   build-jar:
     name: Build JAR

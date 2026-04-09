@@ -168,7 +168,6 @@
         </configuration>
         <executions>
           <execution>
-            <phase>verify</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -194,7 +193,25 @@
         </configuration>
         <executions>
           <execution>
-            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- PMD -->
+        
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.23.0</version>
+        <configuration>
+          <failOnViolation>true</failOnViolation>
+          <printFailingErrors>true</printFailingErrors>
+        </configuration>
+        <executions>
+          <execution>
             <goals>
               <goal>check</goal>
             </goals>
