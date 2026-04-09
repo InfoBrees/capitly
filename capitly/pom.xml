@@ -161,7 +161,6 @@
           <java>
             <importOrder />
             <removeUnusedImports />
-            <forbidWildcardImports />
             <googleJavaFormat>
               <version>1.19.1</version>
               <style>GOOGLE</style>
