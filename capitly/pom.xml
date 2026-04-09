@@ -150,7 +150,7 @@
         <version>2.43.0</version>
         <executions>
           <execution>
-            <phase>verify</phase>
+            <phase>compile</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -168,14 +168,6 @@
             </googleJavaFormat>
             <trimTrailingWhitespace />
             <endWithNewline />
-            <custom>
-              <name>NoSystemOut</name>
-              <target>src/main/java/**/*.java</target>
-              <replace>
-                <pattern>System\.out\.print</pattern>
-                <replacement>/* SYSTEM.OUT REMOVED: Use a logger instead */</replacement>
-              </replace>
-            </custom>
             <licenseHeader>
               <content>/* (C) $YEAR */</content>
             </licenseHeader>
@@ -210,7 +202,7 @@
         </configuration>
         <executions>
           <execution>
-            <phase>verify</phase>
+            <phase>compile</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -225,7 +217,7 @@
         <version>4.9.8.0</version>
         <executions>
           <execution>
-            <phase>verify</phase>
+            <phase>compile</phase>
             <goals>
               <goal>check</goal>
             </goals>

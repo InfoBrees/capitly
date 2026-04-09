@@ -19,13 +19,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -37,19 +30,12 @@ jobs:
       working-directory: ./capitly
       run: mvn test
 
-  checks:
-    name: Checks
+  linting:
+    name: Linting
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -58,14 +44,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run Checks
+      - name: Run linting
         working-directory: ./capitly
-        run: mvn verify -DskipTests
+        run: mvn compile
 
   build-jar:
     name: Build JAR
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-    needs: [test, checks]
+    needs: [test, linting]
     runs-on: ubuntu-latest
 
     steps:
