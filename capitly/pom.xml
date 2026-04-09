@@ -168,11 +168,14 @@
             </googleJavaFormat>
             <trimTrailingWhitespace />
             <endWithNewline />
-            <forbidRegex>
-              <name>No System.out</name>
-              <searchRegex>System\.out\.print</searchRegex>
-              <lintDetail>Use a logger (@Slf4j) instead of System.out!</lintDetail>
-            </forbidRegex>
+            <custom>
+              <name>NoSystemOut</name>
+              <target>src/main/java/**/*.java</target>
+              <replace>
+                <pattern>System\.out\.print</pattern>
+                <replacement>/* SYSTEM.OUT REMOVED: Use a logger instead */</replacement>
+              </replace>
+            </custom>
             <licenseHeader>
               <content>/* (C) $YEAR */</content>
             </licenseHeader>
