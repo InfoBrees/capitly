@@ -46,7 +46,7 @@ jobs:
 
       - name: Run linting
         working-directory: ./capitly
-        run: mvn compile
+        run: mvn verify -DskipTests
 
   build-jar:
     name: Build JAR

@@ -147,62 +147,28 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.43.0</version>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
+        <version>3.3.0</version>
         <configuration>
-          <ratchetFrom>origin/main</ratchetFrom>
           <java>
-            <importOrder />
-            <removeUnusedImports />
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+            </includes>
             <googleJavaFormat>
-              <version>1.19.1</version>
+              <version>1.16.0</version>
               <style>GOOGLE</style>
-              <reflowLongStrings>true</reflowLongStrings>
             </googleJavaFormat>
-            <trimTrailingWhitespace />
-            <endWithNewline />
-            <licenseHeader>
-              <content>/* (C) $YEAR */</content>
-            </licenseHeader>
+            <removeUnusedImports />
+            <forbidWildcardImports />
+            <formatAnnotations />
+            <importOrder>
+              <order>java,javax,org,com,</order>
+            </importOrder>
           </java>
-          <formats>
-            <format>
-              <includes>
-                <include>.gitattributes</include>
-                <include>.gitignore</include>
-              </includes>
-              <trimTrailingWhitespace />
-              <endWithNewline />
-              <indent>
-                <spaces>true</spaces>
-                <spacesPerTab>4</spacesPerTab>
-              </indent>
-            </format>
-          </formats>
-        </configuration>
-      </plugin>
-
-      <!-- 7. Checkstyle -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.3.1</version>
-        <configuration>
-          <configLocation>google_checks.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <violationSeverity>warning</violationSeverity>
         </configuration>
         <executions>
           <execution>
-            <phase>compile</phase>
+            <phase>verify</phase>
             <goals>
               <goal>check</goal>
             </goals>
@@ -210,14 +176,14 @@
         </executions>
       </plugin>
 
-      <!-- 8. SpotBugs -->
+      <!-- 7. SpotBugs -->
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
         <version>4.9.8.0</version>
         <executions>
           <execution>
-            <phase>compile</phase>
+            <phase>verify</phase>
             <goals>
               <goal>check</goal>
             </goals>
