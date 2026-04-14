@@ -1,4 +1,4 @@
-package io.github.infobrees;
+package io.github.infobrees.auth;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -185,4 +185,5 @@ build/
 .vite/
 
 # Spring
-application.properties
+application.yml
+application.yaml
