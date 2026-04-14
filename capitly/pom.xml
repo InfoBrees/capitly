@@ -156,16 +156,16 @@
             </includes>
             <googleJavaFormat>
               <version>1.35.0</version>
-              <style>GOOGLE</style>
+              <style>AOSP</style>
             </googleJavaFormat>
-            <indent>
+            <!-- <indent>
                 <tabs>true</tabs>
                 <spacesPerTab>2</spacesPerTab>
             </indent>
             <indent>
                 <spaces>true</spaces>
                 <spacesPerTab>4</spacesPerTab>
-            </indent>
+            </indent> -->
             <removeUnusedImports />
             <forbidWildcardImports />
             <formatAnnotations />
