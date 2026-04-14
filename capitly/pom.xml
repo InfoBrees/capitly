@@ -158,6 +158,14 @@
               <version>1.35.0</version>
               <style>GOOGLE</style>
             </googleJavaFormat>
+            <indent>
+                <tabs>true</tabs>
+                <spacesPerTab>2</spacesPerTab>
+            </indent>
+            <indent>
+                <spaces>true</spaces>
+                <spacesPerTab>4</spacesPerTab>
+            </indent>
             <removeUnusedImports />
             <forbidWildcardImports />
             <formatAnnotations />
@@ -201,7 +209,7 @@
       </plugin>
 
       <!-- PMD -->
-        
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>

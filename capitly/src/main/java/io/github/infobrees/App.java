@@ -9,10 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class App {
 
-  private static final Logger logger = LoggerFactory.getLogger(App.class);
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
-  public static void main(String[] args) {
-    logger.info("✅ Starting Capitly...");
-    SpringApplication.run(App.class, args);
-  }
+    public static void main(String[] args) {
+        logger.info("✅ Starting Capitly...");
+        SpringApplication.run(App.class, args);
+    }
 }
