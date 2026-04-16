@@ -1,0 +1,7 @@
+spring:
+  main:
+    headless: true
+
+logging:
+  file:
+    path: logs

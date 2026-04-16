@@ -22,3 +22,43 @@ Capitly aims to bridge the gap between:
 * Simple finance tracking apps
 
 Giving you the best of both worlds.
+
+---
+
+## Build & Run
+
+### Prerequisites
+
+* Java 25
+* Maven 3.9+
+* Node.js 20+
+
+### Backend (multi-module)
+
+From `capitly/capitly`:
+
+```bash
+# Build all backend modules
+mvn clean verify
+
+# Run core module
+mvn -pl core spring-boot:run
+
+# Run auth module
+mvn -pl auth spring-boot:run
+```
+
+### Frontend
+
+From `capitly/frontend`:
+
+```bash
+# Install dependencies
+npm ci
+
+# Start dev server
+npm run dev
+
+# Production build
+npm run build
+```
