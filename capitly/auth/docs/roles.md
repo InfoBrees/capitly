@@ -26,9 +26,9 @@ Ziel ist es, Rollen granular bestimmte Aktion zu erlauben ohne neue Clearance Le
 
 ### Domänenspezifische Scopes
 
-Die Scopes sind grob nach dem folgednen Schema aufgebaut: resource.action.
+Die Scopes sind grob nach dem folgednen Schema aufgebaut: resource.action. Der Owner Check findet statt bei actor.clearance = obj.clearance, also zB. bob.clearance = 1 und beispiel_api.clearance = 1 dann brauch bob das Owner Recht auf der Resource die er anfragt.
 
-| Scope | Beschreibung | Owner Check |
+| Scope | Beschreibung | Owner Check (x = mit) |
 | --- | --- | --- | 
 | health.view | benötigter Scope für das System-Health-Dashboard | |
 |  |  | |
