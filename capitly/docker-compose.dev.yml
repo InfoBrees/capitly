@@ -1,5 +1,5 @@
 services:
-  capitly.auth:
+  auth:
     build:
       context: .
       dockerfile: auth/Dockerfile.dev
