@@ -7,3 +7,18 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+
+  postgres.auth:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: capitly_auth
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev_password
+    ports: 
+    - "5432:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql
+
+volumes:
+  postgres_auth_data:
