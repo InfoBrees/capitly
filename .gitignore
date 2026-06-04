@@ -185,5 +185,6 @@ build/
 .vite/
 
 # Spring
-application.yml
-application.yaml
+application*.yml
+application*.yaml
+!application.example.yml
