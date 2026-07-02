@@ -1,0 +1,12 @@
+server:
+  port: 8081
+
+logging:
+  file:
+    name: logs/auth.log
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres.auth:5432/capitly_auth
+    username: dev
+    password: dev_password

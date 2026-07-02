@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: capitly_core
