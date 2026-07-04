@@ -141,7 +141,7 @@ http-client.private.env.json
 *.vsix
 
 # Random 
-.env.*
+*.env*
 !.env.example
 *.iml
 logs/

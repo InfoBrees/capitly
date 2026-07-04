@@ -1,4 +1,17 @@
 services:
+  traefik:
+    image: traefik:v3.7
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+      - "8080:8080" # Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   auth:
     build:
       context: .
@@ -7,6 +20,14 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
+      - "traefik.http.middlewares.auth-strip.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.middlewares=auth-strip"
+      - "traefik.http.services.auth.loadbalancer.server.port=8081"
+    depends_on:
+      - postgres.auth
 
   postgres.auth:
     image: postgres:18-bookworm
@@ -15,10 +36,10 @@ services:
       POSTGRES_DB: capitly_auth
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: dev_password
-    ports: 
-    - "5432:5432"
+    ports:
+      - "5432:5432"
     volumes:
-      - postgres_auth_data:/var/lib/postgresql
+      - postgres_auth_data:/var/lib/postgresql/
 
 volumes:
   postgres_auth_data:
