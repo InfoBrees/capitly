@@ -1,3 +1,5 @@
 spring:
   application:
     name: capitly_auth
+  main:
+    banner-mode: off
