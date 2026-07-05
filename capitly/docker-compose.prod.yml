@@ -1,38 +1,34 @@
 services:
   traefik:
     image: traefik:v3.7
+    restart: unless-stopped
     command:
-      - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
     ports:
       - "80:80"
-      - "8080:8080" # Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - proxy
 
   auth:
-    build:
-      context: .
-      dockerfile: auth/Dockerfile.dev
-    ports:
-      - "8081:8081"
+    image: ${CAPITLY_AUTH_IMAGE}
+    restart: unless-stopped
+    env_file:
+      - auth.env
+      - auth-shared.env
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=prod
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
       - "traefik.http.routers.auth.priority=10"
-      - "traefik.http.middlewares.auth-strip.stripprefix.prefixes=/auth" # remove on implementation start
-      - "traefik.http.routers.auth.middlewares=auth-strip" # remove on implementation start
-      - "traefik.http.services.auth.loadbalancer.server.port=8081"
+      - "traefik.http.services.auth.loadbalancer.server.port=${AUTH_SERVER_PORT}"
     depends_on:
       postgres_auth:
         condition: service_healthy
-      
     networks:
       - auth
       - proxy
@@ -40,18 +36,14 @@ services:
   postgres_auth:
     image: postgres:18-bookworm
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: capitly_auth
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev_password
-    ports:
-      - "5432:5432"
+    env_file:
+      - auth-shared.env
     volumes:
-      - postgres_auth_data:/var/lib/postgresql/
+      - postgres_auth_data_prod:/var/lib/postgresql/
     networks:
       - auth
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d capitly_auth"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -59,26 +51,24 @@ services:
 
   frontend:
     image: nginx:alpine
-    ports: 
-      - "3000:80"
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.services.frontend.loadbalancer.server.port=${FRONTEND_SERVER_PORT}"
     networks:
       - proxy
 
 
   core:
     image: traefik/whoami
-    ports:
-      - "8082:80"
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.core.priority=10"
-      - "traefik.http.services.core.loadbalancer.server.port=80"
+      - "traefik.http.services.core.loadbalancer.server.port=${CORE_SERVER_PORT}"
     depends_on:
       postgres_core:
         condition: service_healthy
@@ -90,13 +80,11 @@ services:
     image: postgres:18-bookworm
     restart: unless-stopped
     environment:
-      POSTGRES_DB: capitly_core
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev_password
-    ports:
-      - "5433:5432"
+      POSTGRES_DB: capitly_core # todo: rework with core docker issue
+      POSTGRES_USER: dev #
+      POSTGRES_PASSWORD: dev_password #
     volumes:
-      - postgres_core_data:/var/lib/postgresql/
+      - postgres_core_data_prod:/var/lib/postgresql/
     networks:
       - core
     healthcheck:
@@ -112,5 +100,5 @@ networks:
   core:
 
 volumes:
-  postgres_auth_data:
-  postgres_core_data:
+  postgres_auth_data_prod:
+  postgres_core_data_prod:
