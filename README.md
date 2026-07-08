@@ -40,7 +40,7 @@ From `capitly`:
 
 ```bash
 # run the full dev environment
-docker compose -f capitly/docker-compose.dev.yml up --build  
+docker compose -f docker-compose.dev.yml up --build  
 
 # stop it
 docker compose -f docker-compose.dev.yml down

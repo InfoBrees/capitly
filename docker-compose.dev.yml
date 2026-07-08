@@ -16,10 +16,10 @@ services:
 
   auth:
     build:
-      context: .
+      context: capitly
       dockerfile: auth/Dockerfile.dev
     ports:
-      - "8081:8081"
+      - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
     labels:
@@ -28,7 +28,7 @@ services:
       - "traefik.http.routers.auth.priority=10"
       - "traefik.http.middlewares.auth-strip.stripprefix.prefixes=/auth" # remove on implementation start
       - "traefik.http.routers.auth.middlewares=auth-strip" # remove on implementation start
-      - "traefik.http.services.auth.loadbalancer.server.port=8081"
+      - "traefik.http.services.auth.loadbalancer.server.port=8080"
     depends_on:
       postgres_auth:
         condition: service_healthy
