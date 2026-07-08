@@ -5,6 +5,7 @@ services:
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=proxy
       - --entrypoints.web.address=:80
     ports:
       - "80:80"
@@ -23,8 +24,11 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
-      - "traefik.http.routers.auth.priority=10"
+      - "traefik.http.routers.auth.priority=100"
+      - "traefik.http.middlewares.auth-strip.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.middlewares=auth-strip"
       - "traefik.http.services.auth.loadbalancer.server.port=${AUTH_SERVER_PORT}"
     depends_on:
       postgres_auth:
@@ -60,21 +64,21 @@ services:
     networks:
       - proxy
 
-
   core:
     image: traefik/whoami
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.core.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.core.priority=10"
+      - "traefik.http.routers.core.priority=100"
       - "traefik.http.services.core.loadbalancer.server.port=${CORE_SERVER_PORT}"
     depends_on:
       postgres_core:
         condition: service_healthy
     networks:
-      - proxy
       - core
+      - proxy
 
   postgres_core:
     image: postgres:18-bookworm
@@ -96,6 +100,7 @@ services:
 
 networks:
   proxy:
+    name: proxy
   auth:
   core:
 
