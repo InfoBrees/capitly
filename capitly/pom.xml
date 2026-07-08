@@ -34,6 +34,13 @@
   </modules>
 
   <dependencies>
+
+  <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.42.0.0</version>
+    </dependency>
+
   <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-flyway</artifactId>
@@ -70,7 +77,7 @@
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[25,26)</version>
+                  <version>[25,)</version>
                 </requireJavaVersion>
                 <requireMavenVersion>
                   <version>[3.9.6,)</version>

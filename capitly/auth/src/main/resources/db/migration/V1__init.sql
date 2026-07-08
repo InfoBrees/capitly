@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS Test(
+    a TEXT PRIMARY KEY,
+    b TEXT
+);
