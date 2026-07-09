@@ -1,0 +1,13 @@
+server:
+  port: ${SERVER_PORT}
+
+logging:
+  file:
+    name: ${LOG_FILE_NAME}
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  
