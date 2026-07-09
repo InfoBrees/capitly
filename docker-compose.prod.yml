@@ -58,6 +58,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.routers.frontend.priority=1"
       - "traefik.http.services.frontend.loadbalancer.server.port=${FRONTEND_SERVER_PORT}"
