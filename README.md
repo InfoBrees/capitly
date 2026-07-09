@@ -34,18 +34,29 @@ Giving you the best of both worlds.
 * Node.js 20+
 
 ### Backend (multi-module)
-
-From `capitly/capitly`:
+From `capitly`:
+> Recommended way: run everything via Docker Compose.  
+> You can also start individual modules with Maven, but the environment (DB, networking, config) may not match the Docker setup and can lead to inconsistencies.
 
 ```bash
-# Build all backend modules
-mvn clean verify
+# run the full dev environment
+docker compose -f docker-compose.dev.yml up --build  
 
-# Run core module
-mvn -pl core spring-boot:run
+# stop it
+docker compose -f docker-compose.dev.yml down
 
-# Run auth module
+# stop it with reset
+docker compose -f docker-compose.dev.yml down -v
+
+# run the prod environment (You need to build the auth image with the dev version first and you need the env files)
+CAPITLY_AUTH_IMAGE=capitly-auth:latest docker compose --env-file .env  -f docker-compose.prod.yml up
+
+# stop it
+CAPITLY_AUTH_IMAGE=capitly-auth:latest docker compose --env-file .env  -f docker-compose.prod.yml down
+
+# optional via maven (not recommended)
 mvn -pl auth spring-boot:run
+mvn -pl core spring-boot:run
 ```
 
 ### Frontend

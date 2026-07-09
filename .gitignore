@@ -141,7 +141,7 @@ http-client.private.env.json
 *.vsix
 
 # Random 
-.env.*
+*.env*
 !.env.example
 *.iml
 logs/
@@ -183,7 +183,3 @@ build/
 .svelte-kit/
 *.tsbuildinfo
 .vite/
-
-# Spring
-application.yml
-application.yaml

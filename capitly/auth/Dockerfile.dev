@@ -1,0 +1,15 @@
+FROM eclipse-temurin:25-jdk AS builder
+
+WORKDIR /app
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+RUN mvn -f /app/pom.xml -pl auth -am -DskipTests package
+
+FROM eclipse-temurin:25-jdk
+WORKDIR /app
+
+# jar from builder stage
+COPY --from=builder /app/auth/target/capitly-auth-0.0.0-dev.jar /app/app.jar
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
