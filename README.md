@@ -49,10 +49,10 @@ docker compose -f docker-compose.dev.yml down
 docker compose -f docker-compose.dev.yml down -v
 
 # run the prod environment (You need to build the auth image with the dev version first and you need the env files)
-CAPITLY_AUTH_IMAGE=capitly-auth:latest docker compose --env-file .env  -f docker-compose.prod.yml up
+CAPITLY_AUTH_IMAGE=capitly-auth:latest CAPITLY_CORE_IMAGE=capitly-core:latest docker compose --env-file .env  -f docker-compose.prod.yml up
 
 # stop it
-CAPITLY_AUTH_IMAGE=capitly-auth:latest docker compose --env-file .env  -f docker-compose.prod.yml down
+CAPITLY_AUTH_IMAGE=capitly-auth:latest CAPITLY_CORE_IMAGE=capitly-core:latest docker compose --env-file .env  -f docker-compose.prod.yml down
 
 # optional via maven (not recommended)
 mvn -pl auth spring-boot:run
