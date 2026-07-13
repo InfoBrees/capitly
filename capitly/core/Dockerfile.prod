@@ -4,17 +4,17 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
 COPY . /app
-RUN mvn -f /app/pom.xml -pl auth -am -DskipTests clean package
+RUN mvn -f /app/pom.xml -pl core -am -DskipTests clean package
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 
-RUN adduser --system auth_officer
+RUN adduser --system core_officer
 
-COPY --from=builder /app/auth/target/capitly-auth-0.0.0-dev.jar /app/app.jar
+COPY --from=builder /app/core/target/capitly-core-0.0.0-dev.jar /app/app.jar
 
-RUN chown auth_officer /app/app.jar
+RUN chown core_officer /app/app.jar
 
-USER auth_officer
+USER core_officer
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

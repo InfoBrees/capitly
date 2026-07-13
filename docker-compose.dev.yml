@@ -60,7 +60,7 @@ services:
 
   frontend:
     image: nginx:alpine
-    ports: 
+    ports:
       - "3000:80"
     labels:
       - "traefik.enable=true"
@@ -73,15 +73,19 @@ services:
 
 
   core:
-    image: traefik/whoami
+    build:
+      context: capitly
+      dockerfile: core/Dockerfile.dev
     ports:
-      - "8082:80"
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.core.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.core.priority=100"
-      - "traefik.http.services.core.loadbalancer.server.port=80"
+      - "traefik.http.services.core.loadbalancer.server.port=8080"
     depends_on:
       postgres_core:
         condition: service_healthy

@@ -66,8 +66,13 @@ services:
       - proxy
 
   core:
-    image: traefik/whoami
+    image: ${CAPITLY_CORE_IMAGE}
     restart: unless-stopped
+    env_file:
+      - core.env
+      - core-shared.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -84,16 +89,14 @@ services:
   postgres_core:
     image: postgres:18-bookworm
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: capitly_core # todo: rework with core docker issue
-      POSTGRES_USER: dev #
-      POSTGRES_PASSWORD: dev_password #
+    env_file:
+      - core-shared.env
     volumes:
       - postgres_core_data_prod:/var/lib/postgresql/
     networks:
       - core
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d capitly_core"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
