@@ -1,0 +1,390 @@
+openapi: 3.0.0
+info:
+  title: Capitly Core API
+  version: '1.0'
+servers:
+  - url: https://api.placeholder.test/v1
+paths:
+  /coins/live/{coinId}:
+    get:
+      tags:
+        - coins
+      summary: Get live coin data
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveCoin'
+
+  /coins/{coinId}:
+    get:
+      tags:
+        - coins
+      summary: Get coin by id
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coin'
+  /coins:
+    get:
+      tags:
+        - coins
+      summary: Get all coins
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Zero-based page index.
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of items per page.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCoinsResponse'
+  /coins/history/{coinId}:
+    get:
+      tags:
+        - coins
+      summary: Get historical price points for a coin
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve history for.
+        - in: query
+          name: range
+          required: false
+          schema:
+            type: string
+            enum:
+              - 24h
+              - 7d
+              - 1m
+            default: 24h
+          description: Predefined time range for the historical data.
+        - in: query
+          name: from
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Optional start timestamp for a custom range.
+        - in: query
+          name: to
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Optional end timestamp for a custom range.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceHistoryResponse'
+  /watchlists/{watchlistId}:
+    get:
+      tags:
+        - watchlists
+      summary: Get user watchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: UUIDv7
+          required: true
+          description: Numeric uuid of the watchlist to get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: UUIDv7
+                  userId:
+                    type: string
+                    format: UUIDv7
+                  coins:
+                    type: array
+                    items:
+                      type: string
+                      format: UUIDv7
+  /watchlists/{watchlistId}/coins:
+    get:
+      tags:
+        - watchlists
+      summary: Get all coins in a watchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: UUIDv7
+          required: true
+          description: Numeric uuid of the watchlist
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: UUIDv7
+                    symbol:
+                      type: string
+                    name:
+                      type: string
+    post:
+      tags:
+        - watchlists
+      summary: Add a coin to the watchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: UUIDv7
+          required: true
+          description: Numeric uuid of the watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - coinId
+              properties:
+                coinId:
+                  type: string
+                  format: UUIDv7
+                  description: Coin to add to the watchlist
+      responses:
+        '201':
+          description: Created
+  /watchlists/{watchlistId}/coins/{coinId}:
+    delete:
+      tags:
+        - watchlists
+      summary: Remove a coin from the watchlist
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: UUIDv7
+          required: true
+          description: Numeric uuid of the watchlist
+        - in: path
+          name: coinId
+          schema:
+            type: string
+            format: UUIDv7
+          required: true
+          description: Numeric uuid of the coin to remove
+      responses:
+        '204':
+          description: No Content
+
+components:
+  schemas:
+    LiveCoin:
+      type: object
+      required:
+        - coinId
+        - price
+        - timestamp
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: Unique identifier of the coin.
+        price:
+          type: number
+          format: double
+          description: Latest price of the coin.
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when the price was captured.
+
+    Coin:
+      type: object
+      required:
+        - coinId
+        - symbol
+        - name
+        - price
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: Unique identifier of the coin.
+        symbol:
+          type: string
+          description: Trading symbol of the coin.
+        name:
+          type: string
+          description: Human-readable coin name.
+        price:
+          type: number
+          format: double
+          description: Latest price of the coin.
+
+    Watchlist:
+      type: object
+      required:
+        - watchlistId
+        - userId
+        - coins
+      properties:
+        watchlistId:
+          type: string
+          format: uuid
+          description: Unique identifier of the watchlist.
+        userId:
+          type: string
+          format: uuid
+          description: Identifier of the user who owns the watchlist.
+        coins:
+          type: array
+          description: Coin identifiers in the watchlist.
+          items:
+            type: string
+            format: uuid
+
+    AddCoinToWatchlistRequest:
+      type: object
+      required:
+        - coinId
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: UUID of the coin to add to the watchlist.
+
+    PricePoint:
+      type: object
+      required:
+        - timestamp
+        - price
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the price point.
+        price:
+          type: number
+          format: double
+          description: Historical price at that timestamp.
+
+    PriceHistoryResponse:
+      type: object
+      required:
+        - coinId
+        - range
+        - points
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: UUID of the coin.
+        range:
+          type: string
+          enum:
+            - 24h
+            - 7d
+            - 1m
+          description: Selected time range.
+        points:
+          type: array
+          description: Historical price points ordered by time.
+          items:
+            $ref: '#/components/schemas/PricePoint'
+
+    PaginatedCoinsResponse:
+      type: object
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+        - hasNext
+        - hasPrevious
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Coin'
+        page:
+          type: integer
+          minimum: 0
+          description: Zero-based page index.
+        size:
+          type: integer
+          minimum: 1
+          description: Number of items in the current page.
+        totalElements:
+          type: integer
+          minimum: 0
+          description: Total number of matched records.
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages.
+        hasNext:
+          type: boolean
+          description: Whether there is a next page.
+        hasPrevious:
+          type: boolean
+          description: Whether there is a previous page.
