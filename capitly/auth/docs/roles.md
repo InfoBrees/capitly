@@ -32,8 +32,7 @@ Die Scopes sind grob nach dem folgednen Schema aufgebaut: resource.action. Der O
 | --- | --- | --- | 
 | health.view | benötigter Scope für das System-Health-Dashboard | |
 |  |  | |
-| portfolio.read.public | benötigt für das Lesen von Daten im Portfolio Kontext | |
-| portfolio.read.private | benötigt für das Lesen von Einträgen im Portfolio Kontext | x |
+| portfolio.read | Lesen von Portfolio-Daten einschließlich Watchlist-Daten | x |
 | portfolio.write | benötigt für das Anlegen von Einträgen im Portfolio Kontext | x |
 | portfolio.delete | benötigt für das Löschen von Eintragen im Portfolio Kontext | x |
 |  |  | |
@@ -46,13 +45,15 @@ Weiter Scopes können hinzugfügt werden.
 
 ## Mapping: Externe Rolle → Clearance + Scopes
 
-Eine Rolle besteht aus einem Clearance Level und der ihr zugeordneten Scopes. Die Standard Scopes gehören zum OIDC Flow und sind prinzipell in jeder Rolle enthalten, gehören aber nicht zum API-Zugriffsmodell für den core.
+Eine Rolle besteht aus einem Clearance Level und den ihr zugeordneten
+fachlichen API-Scopes. Die Standard-Scopes `openid`, `profile` und `email`
+gehören zum OIDC-Flow und werden nicht mit Rollen verknüpft. Sie gehören nicht
+zum API-Zugriffsmodell für den `core`.
 
 | Externe Rolle | Beschreibung | Clearance (Level) | Scopes | Anmerkungen |
 | --- | --- | --- | --- | --- |
-| ADMIN | | HIGH (2) | health.view, portfolio.read.public, portfolio.read.private, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | Admins dürfen Owner‑Checks umgehen |
-| USER  | | LOW (1)  | portfolio.read.public, portfolio.read.private, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | |
-| GUEST | | LOW (1)  | portfolio.read.public | |
+| ADMIN | | HIGH (2) | health.view, portfolio.read, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | Admins dürfen Owner‑Checks umgehen |
+| USER  | | LOW (1)  | portfolio.read, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | |
 
 
 Weiter Rollen können hinzugefüht werden.
@@ -82,9 +83,9 @@ Payload (JSON, Beispiel‑Claims):
   "exp": 1714461600,
   "jti": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
 
-  "scope": "openid profile email portfolio.read.private portfolio.write accounts.read accounts.write",
+  "scope": "openid profile email portfolio.read portfolio.write accounts.read accounts.write",
   "scp": [
-    "portfolio.read.private",
+    "portfolio.read",
     "portfolio.write",
     "accounts.read",
     "accounts.write"
