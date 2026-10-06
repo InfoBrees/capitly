@@ -13,18 +13,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class App {
 
-    private static final Logger logger = LoggerFactory.getLogger(App.class);
+  private static final Logger logger = LoggerFactory.getLogger(App.class);
 
-    public static void main(String[] args) {
-        logger.info("✅ Starting capitly.core...");
-        var context = SpringApplication.run(App.class, args);
+  public static void main(String[] args) {
+    logger.info("✅ Starting capitly.core...");
+    var context = SpringApplication.run(App.class, args);
 
-        var ds = context.getBean(DataSource.class);
+    var ds = context.getBean(DataSource.class);
 
-        try (Connection c = ds.getConnection()) {
-            System.out.println("DB OK: " + c.getMetaData().getURL());
-        } catch (Exception e) {
-            System.err.println("DB FAILED: " + e.getMessage());
-        }
+    try (Connection c = ds.getConnection()) {
+      System.out.println("DB OK: " + c.getMetaData().getURL());
+    } catch (Exception e) {
+      System.err.println("DB FAILED: " + e.getMessage());
     }
+  }
 }
