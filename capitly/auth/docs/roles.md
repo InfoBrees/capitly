@@ -32,8 +32,7 @@ Die Scopes sind grob nach dem folgednen Schema aufgebaut: resource.action. Der O
 | --- | --- | --- | 
 | health.view | benötigter Scope für das System-Health-Dashboard | |
 |  |  | |
-| portfolio.read.public | benötigt für das Lesen von Daten im Portfolio Kontext | |
-| portfolio.read.private | benötigt für das Lesen von Einträgen im Portfolio Kontext | x |
+| portfolio.read | benötigt für das Lesen von Einträgen im Portfolio Kontext | x |
 | portfolio.write | benötigt für das Anlegen von Einträgen im Portfolio Kontext | x |
 | portfolio.delete | benötigt für das Löschen von Eintragen im Portfolio Kontext | x |
 |  |  | |
@@ -50,9 +49,8 @@ Eine Rolle besteht aus einem Clearance Level und der ihr zugeordneten Scopes. Di
 
 | Externe Rolle | Beschreibung | Clearance (Level) | Scopes | Anmerkungen |
 | --- | --- | --- | --- | --- |
-| ADMIN | | HIGH (2) | health.view, portfolio.read.public, portfolio.read.private, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | Admins dürfen Owner‑Checks umgehen |
-| USER  | | LOW (1)  | portfolio.read.public, portfolio.read.private, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | |
-| GUEST | | LOW (1)  | portfolio.read.public | |
+| ADMIN | | HIGH (2) | health.view, portfolio.read, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | Admins dürfen Owner‑Checks umgehen |
+| USER  | | LOW (1)  | portfolio.read, portfolio.write, portfolio.delete, accounts.read, accounts.write, accounts.delete | |
 
 
 Weiter Rollen können hinzugefüht werden.

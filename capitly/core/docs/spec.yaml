@@ -1,0 +1,538 @@
+openapi: 3.0.0
+info:
+  title: Capitly Core API
+  version: '1.0'
+  description: API for coin data, price history, and authenticated user watchlists.
+servers:
+  - url: https://api.placeholder.test/v1
+    description: API base URL
+tags:
+  - name: coins
+    description: Coin data and price history
+  - name: watchlists
+    description: Authenticated user watchlist management
+paths:
+  /coins/live/{coinId}:
+    get:
+      tags:
+        - coins
+      operationId: getLiveCoin
+      summary: Get live coin data
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveCoin'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /coins/{coinId}:
+    get:
+      tags:
+        - coins
+      operationId: getCoinById
+      summary: Get coin by id
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Coin'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /coins:
+    get:
+      tags:
+        - coins
+      operationId: listCoins
+      summary: Get all coins
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Zero-based page index.
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of items per page.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCoinsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /coins/history/{coinId}:
+    get:
+      tags:
+        - coins
+      operationId: getCoinPriceHistory
+      summary: Get historical price points for a coin
+      parameters:
+        - in: path
+          name: coinId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the coin to retrieve history for.
+        - in: query
+          name: range
+          required: false
+          schema:
+            type: string
+            enum:
+              - 24h
+              - 7d
+              - 1m
+            default: 24h
+          description: Predefined time range for the historical data.
+        - in: query
+          name: from
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Optional start timestamp for a custom range.
+        - in: query
+          name: to
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: Optional end timestamp for a custom range.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceHistoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /watchlists/{watchlistId}:
+    get:
+      tags:
+        - watchlists
+      operationId: getWatchlist
+      summary: Get user watchlist
+      security:
+        - bearerAuth: []
+      x-required-scopes:
+        - portfolio.read
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Numeric uuid of the watchlist to get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watchlist'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /watchlists/{watchlistId}/coins:
+    get:
+      tags:
+        - watchlists
+      operationId: listWatchlistCoins
+      summary: Get all coins in a watchlist
+      security:
+        - bearerAuth: []
+      x-required-scopes:
+        - portfolio.read
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Numeric uuid of the watchlist
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Coin'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - watchlists
+      operationId: addCoinToWatchlist
+      summary: Add a coin to the watchlist
+      security:
+        - bearerAuth: []
+      x-required-scopes:
+        - portfolio.write
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Numeric uuid of the watchlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCoinToWatchlistRequest'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /watchlists:
+    post:
+      tags:
+        - watchlists
+      operationId: createWatchlist
+      summary: Create a new watchlist
+      security:
+        - bearerAuth: []
+      x-required-scopes:
+        - portfolio.write
+      responses:
+        '201':
+          description: Watchlist created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Watchlist'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /watchlists/{watchlistId}/coins/{coinId}:
+    delete:
+      tags:
+        - watchlists
+      operationId: removeCoinFromWatchlist
+      summary: Remove a coin from the watchlist
+      security:
+        - bearerAuth: []
+      x-required-scopes:
+        - portfolio.delete
+      parameters:
+        - in: path
+          name: watchlistId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Numeric uuid of the watchlist
+        - in: path
+          name: coinId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: Numeric uuid of the coin to remove
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: The request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unauthorized:
+      description: Missing or invalid JWT token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Forbidden:
+      description: The authenticated user is not allowed to access this resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NotFound:
+      description: The requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Conflict:
+      description: The requested operation conflicts with the current resource state.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    InternalServerError:
+      description: An unexpected server error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable error code.
+          example: WATCHLIST_NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error message.
+          example: Watchlist was not found.
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          example: /watchlists/018f3f8c-9b2e-7d4e-a123-456789abcdef
+
+    LiveCoin:
+      type: object
+      required:
+        - coinId
+        - price
+        - timestamp
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: Unique identifier of the coin.
+        price:
+          type: number
+          format: double
+          minimum: 0
+          description: Latest price of the coin.
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp when the price was captured.
+
+    Coin:
+      type: object
+      required:
+        - coinId
+        - symbol
+        - name
+        - price
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: Unique identifier of the coin.
+        symbol:
+          type: string
+          description: Trading symbol of the coin.
+        name:
+          type: string
+          description: Human-readable coin name.
+        price:
+          type: number
+          format: double
+          minimum: 0
+          description: Latest price of the coin.
+
+    Watchlist:
+      type: object
+      required:
+        - watchlistId
+        - userId
+        - coins
+      properties:
+        watchlistId:
+          type: string
+          format: uuid
+          description: Unique identifier of the watchlist.
+        userId:
+          type: string
+          format: uuid
+          description: Identifier of the user who owns the watchlist.
+        coins:
+          type: array
+          description: Coin identifiers in the watchlist.
+          items:
+            type: string
+            format: uuid
+
+    AddCoinToWatchlistRequest:
+      type: object
+      required:
+        - coinId
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: UUID of the coin to add to the watchlist.
+
+    PricePoint:
+      type: object
+      required:
+        - timestamp
+        - price
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the price point.
+        price:
+          type: number
+          format: double
+          minimum: 0
+          description: Historical price at that timestamp.
+
+    PriceHistoryResponse:
+      type: object
+      required:
+        - coinId
+        - range
+        - points
+      properties:
+        coinId:
+          type: string
+          format: uuid
+          description: UUID of the coin.
+        range:
+          type: string
+          enum:
+            - 24h
+            - 7d
+            - 1m
+          description: Selected time range.
+        points:
+          type: array
+          description: Historical price points ordered by time.
+          items:
+            $ref: '#/components/schemas/PricePoint'
+
+    PaginatedCoinsResponse:
+      type: object
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+        - hasNext
+        - hasPrevious
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Coin'
+        page:
+          type: integer
+          minimum: 0
+          description: Zero-based page index.
+        size:
+          type: integer
+          minimum: 1
+          description: Number of items in the current page.
+        totalElements:
+          type: integer
+          minimum: 0
+          description: Total number of matched records.
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages.
+        hasNext:
+          type: boolean
+          description: Whether there is a next page.
+        hasPrevious:
+          type: boolean
+          description: Whether there is a previous page.
