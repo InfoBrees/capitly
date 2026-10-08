@@ -50,7 +50,7 @@ public class CoinHandler {
                     coinId, range.map(PriceHistoryRange::fromValue).orElse(PriceHistoryRange.H24), List.of()));
     }
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<PaginatedCoinsResponse> getPaginatedCoins(
             @RequestParam Integer page, @RequestParam Integer size) {
         logger.info("Logging...");
